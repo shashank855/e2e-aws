@@ -156,10 +156,16 @@ volume-data-integrity-{fio-jiva}:
   script:
    - ./script/apps/fio/tests/jiva/fio-volume-data-integrity-check
 
-volume-memory-consumption-{memleak-jiva}:
+volume-memory-consumption-{memcheck-jiva}:
   extends: .func_test_template
   script:
    - ./script/apps/memleak/tests/jiva/memory-consumption
+
+k8s-snapshot-clone-creation-{snapshot-clone-jiva}:
+  extends: .func_test_template
+  script:
+   - ./script/apps/percona/functional/jiva/k8s-snapshot-clone
+
 ## Define job template for chaos jobs 
 
 .chaos_test_template:
