@@ -5,7 +5,7 @@ set -x
 ## ENVIRONMENT ##
 #################
 
-utils_path="~/script/utils"
+utils_path="/openebs/e2e-aws/script/utils"
 
 ## https://github.com/openebs/litmus/blob/master/apps/percona/deployers/test_vars.yml
 test_name=$(${utils_path}/generate_test_name testcase=percona-deployment metadata="")
