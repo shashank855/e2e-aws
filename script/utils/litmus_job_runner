@@ -1,12 +1,13 @@
 #!/bin/bash
 set -x
 
-litmus_job_label=$(echo $1 | cut -d "=" -f 2)
+litmus_job_label_key=$(echo $1 | cut -d "=" -f 2 | cut -d ":" -f 1)
+litmus_job_label_value=$(echo $1 | cut -d "=" -f 2 | cut -d ":" -f 2)
 litmus_job_file=$(echo $2 | cut -d "=" -f 2)
 
 echo "Running the litmus test.."
 
-jobNameCmd="kubectl get jobs -n litmus --no-headers -o jsonpath='{.items[?(@.metadata.labels.name==\"${litmus_job_label}\")].metadata.name}'"
+jobNameCmd="kubectl get jobs -n litmus --no-headers -o jsonpath='{.items[?(@.metadata.labels.${litmus_job_label_key}==\"${litmus_job_label_value}\")].metadata.name}'"
 
 job_deploy_out=$(kubectl create -f ${litmus_job_file}) && \
 job_name=$(eval ${jobNameCmd}); retcode=$?

@@ -53,7 +53,7 @@ sed -i '/command:/i \
 #################
 
 echo "Running the litmus test.."
-${utils_path}/litmus_job_runner label=percona-deployment-cstor job=run_test.yml
+${utils_path}/litmus_job_runner label='app:percona-deployment-cstor' job=run_test.yml
 ${utils_path}/task_delimiter;
 
 echo "Dumping state of cluster post job run"; echo ""
