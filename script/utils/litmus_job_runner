@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 litmus_job_label=$(echo $1 | cut -d "=" -f 2)
 litmus_job_file=$(echo $2 | cut -d "=" -f 2)

@@ -5,7 +5,7 @@ set -ex
 ##   ENVIRONMENT    ##
 ######################
 
-utils_path="/openebs/e2e-aws/script/utils"
+#utils_path="/openebs/e2e-aws/script/utils"
 
 ## TODO: Ideally, run_metadata should be passed as gitlab runner (CI runtime) ENV
 present_dir=$(pwd)
