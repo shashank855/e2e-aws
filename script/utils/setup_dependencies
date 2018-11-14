@@ -18,6 +18,10 @@ derive_cluster_details_infra()
  mkdir -p aws-openebs/ssh
  cat aws/cluster/id.csv > aws-openebs/id.csv
  cat aws/cluster/cluster_name.csv > aws-openebs/cluster_name.csv
+
+ ## TODO: Add this as a conditional step in master utils
+ cat aws/cluster/node_property > aws-openebs/node_property
+
  cp aws/.kube/config aws-openebs/
 }
  
@@ -26,6 +30,9 @@ setup_cluster_config_test()
  mkdir ~/.kube
  cp  aws-openebs/config ~/.kube/config
  cp -r aws-openebs/ssh/. ~/.ssh/
+
+ ## TODO: Add this as a conditional step in master utils 
+ export LITMUS_NODE=$(cat node_property | cut -d "," -f 1 | awk '{print $2}')
 }
 
 if [[ $1 == "infra-setup" ]]; then

@@ -1,0 +1,76 @@
+(1) With multiple apps, state/health pre/post checks after infra chaos are complicated. A general cluster health is alright, pool health may 
+    be too. However, a volume level health check for "each app" may be inefficient. 
+
+    If including app-level health checks that are a pre-condition:
+
+    a)) failure on one app may deny a test run on unaffected another app (as each infra-chaos is "A job") 
+
+    If volume level health checks for apps are ignored: 
+
+    b)) every run may run the chance of becoming a multiple component failure test, i.e., the intent of test (for ex: single comp failure) 
+        might not be met, i.e., it will become like an "exploratory test/manual test" we are doing today
+
+    c)) "CI test results" may not be predictable as the impacting env might change. 
+
+    d)) Debug tasks/time may increase
+
+(2) Each infra chaos, such as, say, a node-evict is performed on the premise of where a particular pod "resides" OR "doesn't reside"
+    (such as app pod, target pod, pool/replica pod etc.,). This is to ensure appropriate behaviour assessment. 
+   
+    In this case, there are two possibilities: 
+
+    a)) With random selection, coverage of above cases is random / behaviour assessment is difficult / tests might give different result
+        in each run
+
+    b)) With logic-based selection, same "test" might need to be iterated multiple times. One way of doing this is to stack these iterations
+        with the desired logic in one "stage" w/ one infra-chaos job waiting on the other. This will cause much longer test durations, 
+        (1) will have to be ensured before each job in the same stage. 
+
+    c))  But most importantly, in an iteration in (b), how will we decide for which "app" will we do the "desired-logic" 
+
+(3) One possible solution is to have a multi-step workflow based "e2e" test (aka cloud-e2e) does : 
+
+    Deploy app, trigger liveness, load app, perform infra-chaos, verify health, cleanup
+
+    pros: 
+
+    a)) (1) (a)(b)(c)(d) addressed. Test intent is maintained, state checks are simpler and debug is easier, results are predicatable
+    b)) (2) (c) addressed. As it is single app based. However, we still need to perform (2)(b) - i.e., iterations in a stage
+
+    cons: 
+
+    c)) App coverage reduces. Some workarounds below
+
+        i))) Fix an app-infrachaos map (with some major apps). Like we do in existing pipeline. For ex: 
+
+             percona: node hard reset
+             mongo: node evict
+             cassandra: pool failure etc..,
+
+             Keep the "infra_chaos utils generic" - such that the same test, say, a "node-hard-reset" can be performed on percona OR mongo as desired.
+             (The same way we are manipulating gitlab runners in exisiting pipeline) 
+
+             Above will have one infra chaos in each stage, with an "e2e" test - that is "iterated" on "desired logic"
+
+        ii)) Have separate parallel pipelines for each "major" app, on a specific low-cost platform (lesser resources are ok as pod count reduces), 
+             such as say, packet - this will mean in our CI we perform infra chaos only on a given provider. This has following problems: 
+
+             *) Platform interop reduces. 
+             *) Needs some gitlab trickery as a folder-based gitlab-ci-yaml is not supported yet (estimated Sept, 2019)
+
+    d)) There is an argument on why "multi-step" tests shouldn't be done - due to: *) needs more maintenance *) has multiple failure points.
+        But IMO, this is not a binding when it comes to custom requirements & moreover, can be mitigated with more "modularization". A case-in point
+        is how the cloud-e2e tests are now being considered as relatively "stable" tests. 
+
+(4) Create infra chaos utils and have framework to run them continuously against a "Staging/Pre-Prod" cluster which is DIFFERENT from workload dashboards.     This will mean:
+
+    a)) We will find bugs, but infra chaos is not in CI, but CD. Considering the way we do CI on "master merge" today, this is still OK & yields
+        same efficiency. But if we start supporting CI runs for PR, then we will be doing sub-optimal test coverage for PR. 
+
+    b)) We will need an automated upgrade tool ASAP in CD
+
+    
+
+    
+        
+

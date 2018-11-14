@@ -2,7 +2,7 @@
 set -e
 
 # ----------------------------- Creating directory ---------------------
-mkdir ~/.aws aws aws/cluster aws/ssh cluster && cd cluster
+mkdir ~/.aws aws aws/cluster aws/ssh aws/.kube cluster && cd cluster
 
 # ----------------------------- Setting AWS credentials ----------------
 echo $CONFIG > ~/.aws/config
@@ -23,7 +23,9 @@ ansible-playbook pre-requisite.yml -v
 
 # ----------------------------- Creating AWS Cluster -------------------
 echo "creating  AWS cluster"
-ansible-playbook create-aws-cluster.yml --extra-vars "k8s_version=1.10.0" -v
+
+## Note: Default taints from https://github.com/openebs/litmus/blob/master/k8s/aws/k8s-installer/create-aws-cluster.yml#L70
+ansible-playbook create-aws-cluster.yml --extra-vars "k8s_version=1.10.0 node_count=4 taint_value=infra-aid=observer:NoSchedule" -v
 
 # ------------------- Applying rbac.yml of litmus ---------------------
 wget https://raw.githubusercontent.com/openebs/litmus/master/hack/rbac.yaml
@@ -32,7 +34,8 @@ kubectl apply -f rbac.yaml
 # --------------------- Preparing for gitlab artifact ------------------
 cat /tmp/aws/cluster_name.csv >/openebs/e2e-aws/aws/cluster/cluster_name.csv
 cat /tmp/aws/id.csv > /openebs/e2e-aws/aws/cluster/id.csv
-mkdir /openebs/e2e-aws/aws/.kube
+cat /tmp/aws/node_property > /openebs/e2e-aws/aws/cluster/node_property
+# mkdir /openebs/e2e-aws/aws/.kube
 cat ~/.kube/config > /openebs/e2e-aws/aws/.kube/admin.conf
 cat ~/.kube/config > /openebs/e2e-aws/aws/.kube/config
 cp -r ~/.ssh/. /openebs/e2e-aws/aws/ssh

@@ -5,13 +5,14 @@ set -x
 ## ENVIRONMENT ##
 #################
 
-## https://github.com/openebs/litmus/blob/master/apps/percona/deployers/test_vars.yml
-test_name=$(${utils_path}/generate_test_name testcase=percona-deployment metadata=cstor)
+## https://github.com/openebs/litmus/blob/master/apps/percona/liveness/test_vars.yml
+run_id="cstor"; test_name=$(${utils_path}/generate_test_name testcase=percona-liveness metadata=${run_id})
  
 ###################
 ## DEPENDENCIES  ##
 ###################
 
+## Sets up the artifact dependencies & also set env LITMUS_NODE
 ${utils_path}/setup_dependencies litmus-test
 
 ## Clone the litmus repo, navigate to litmus root 
@@ -29,29 +30,32 @@ cd litmus
   ------------------------------------------------------------------------------------
  | specAttribute        | kind	   | jiva       	| cStor-sparse  	       |
   ------------------------------------------------------------------------------------
- | litmusJobLabel       | jobSpec  | percona-deployment | percona-deployment-cstor     |
- | providerStorageClass | env 	   | openebs-standard   | openebs-cstor-sparse         |
+ | litmusJobLabel       | jobSpec  | percona-liveness   | percona-liveness-cstor       |
  | appNamespace         | env	   | app-percona-ns     | percona-cstor                |
  | runID		| env(add) | 	-		| cstor 
   ------------------------------------------------------------------------------------
 EOF
 
-cp apps/percona/deployers/run_litmus_test.yml run_test.yml
-sed -i -e 's/app: percona-deployment/app: percona-deployment-cstor/g' \
--e 's/value: openebs-standard/value: openebs-cstor-sparse/g' \
--e 's/value: app-percona-ns/value: percona-cstor/g' run_test.yml
+cp apps/percona/liveness/run_litmus_test.yml run_test.yml
+
+sed -i -e 's/liveness: percona-liveness/liveness: percona-liveness-cstor/g' \
+-e 's/value: percona-mysql.app-percona-ns.svc.cluster.local/value: percona-mysql.percona-cstor.svc.cluster.local/g' run_test.yml
 
 sed -i '/command:/i \
           - name: RUN_ID\
-            value: '"$run_metadata"'\
+            value: '"${run_id}"'\
 ' run_test.yml
+
+## Note: variable substitution in sed needs double-quotes. Usage of "|" to avoid escaping "/"
+sed -i -e "s|#nodeSelector|nodeSelector|g" \
+-e "s|#  kubernetes.io/hostname:|  kubernetes.io/hostname: ${LITMUS_NODE}|g" run_test.yml
 
 #################
 ## RUNNER MAIN ##
 #################
 
 echo "Running the litmus test.."
-${utils_path}/litmus_job_runner label='app:percona-deployment-cstor' job=run_test.yml
+${utils_path}/litmus_job_runner label='liveness:percona-liveness-cstor' job=run_test.yml
 ${utils_path}/task_delimiter;
 
 echo "Dumping state of cluster post job run"; echo ""

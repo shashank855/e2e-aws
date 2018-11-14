@@ -1,0 +1,90 @@
+#!/bin/bash
+
+## GLOBAL VARS
+
+OPENEBS_NS='openebs'
+
+# TODO: Get a better way of doing hash tables in bash :) 
+
+MAYA_KEY='name=maya-apiserver'
+PROV_KEY='name=openebs-provisioner'
+NDM_KEY='name=openebs-ndm'
+SNAP_KEY='name=openebs-snapshot-operator'
+CPOOL_KEY='app=cstor-pool'
+LIVENESS_KEY='infra-aid=liveness'
+
+## FUNCTIONS
+
+get_node_health()
+{
+ nodeHealthCmd="kubectl get nodes --no-headers | awk '{print \$2}' | sort | uniq"
+ if [[ $(eval ${nodeHealthCmd}) != 'Ready' ]]; then
+   echo "One or more nodes are unavailable/not-ready"; exit 1
+ fi
+}
+
+get_kube_system_health()
+{
+ kubeSystemHealthCmd="kubectl get pods -n kube-system -o jsonpath='{.items[*].status.containerStatuses[*].ready}' | tr ' ' '\n' | sort | uniq"
+ if [[ $(eval ${kubeSystemHealthCmd}) != 'true' ]]; then
+   echo "One or more pods in kube-system ns are unhealthy"; exit 1
+ fi
+}
+
+get_openebs_operator_health()
+{
+ for i in ${MAYA_KEY} ${PROV_KEY} ${NDM_KEY} ${SNAP_KEY}; do
+   operatorHealthCmd="kubectl get pods -n ${OPENEBS_NS} -l ${i} -o jsonpath='{.items[*].status.containerStatuses[*].ready}' | tr ' ' '\n' | sort | uniq"
+   if [[ $(eval ${operatorHealthCmd}) != 'true' ]]; then
+     echo "One or more openebs operator pods are unhealthy"; exit 1
+   fi
+ done
+}
+
+get_storage_pool_health()
+{
+ poolHealthCmd="kubectl get pods -n openebs -l ${CPOOL_KEY} -o jsonpath='{.items[*].status.containerStatuses[*].ready}' | tr ' ' '\n' | sort | uniq" 
+ if [[ $(eval ${poolHealthCmd}) != 'true' ]]; then
+   echo "One or more openebs storage pools are unhealthy"; exit 1
+ fi
+}
+
+get_liveness_pod_health()
+{
+ livenessHealthCmd="kubectl get pods -n litmus -l ${LIVENESS_KEY} -o jsonpath='{.items[*].status.containerStatuses[*].ready}' | tr ' ' '\n' | sort | uniq" 
+ if [[ $(eval ${livenessHealthCmd}) != 'true' ]]; then
+   echo "One or more apps are unhealthy (liveness fail)"; exit 1
+ fi
+}
+
+## MAIN
+
+checkType=$(echo $1 | cut -d "=" -f 2)
+
+if [[ ${checkType} == "test-infra" ]]; then
+
+  get_node_health;
+  get_kube_system_health;
+  get_openebs_operator_health;
+  get_storage_pool_health;
+  get_liveness_pod_health;
+
+elif [[ ${checkType} == "node" ]]; then
+  get_node_health;
+
+elif [[ ${checkType} == "kube-system" ]]; then
+  get_kube_system_health;
+
+elif [[ ${checkType} == "openebs-operator" ]]; then
+  get_openebs_operator_health;
+
+elif [[ ${checkType} == "storage-pool" ]]; then
+  get_storage_pool_health;
+
+elif [[ ${checkType} == "liveness" ]]; then
+  get_liveness_pod_health;
+
+else 
+  echo "invalid component type, unable to perform health-check"
+fi
+

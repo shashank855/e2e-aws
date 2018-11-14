@@ -5,30 +5,34 @@ set -x
 ## ENVIRONMENT ##
 #################
 
-## https://github.com/openebs/litmus/blob/master/apps/crunchy-postgres/deployers/test_vars.yml
-test_name=$(${utils_path}/generate_test_name testcase=postgres-deployment metadata="")
-
+## https://github.com/openebs/litmus/blob/master/apps/percona/liveness/test_vars.yml
+run_id=""; test_name=$(${utils_path}/generate_test_name testcase=percona-liveness metadata=${run_id})
+      
 ###################
 ## DEPENDENCIES  ##
 ###################
+
 ${utils_path}/setup_dependencies litmus-test
 
-## Clone the litmus repo, checkout the e2e branch, navigate to litmus root 
+## Clone the litmus repo,navigate to litmus root 
 git clone https://github.com/openebs/litmus.git
-cd litmus
+cd litmus 
 
 ############################
 ## LITMUS PRECONDITIONING ##
 ############################
 
-cp apps/crunchy-postgres/deployers/run_litmus_test.yml run_test.yml
+cp apps/percona/liveness/run_litmus_test.yml run_test.yml
+
+sed -i -e "s|#nodeSelector|nodeSelector|g" \
+-e "s|#  kubernetes.io/hostname:|  kubernetes.io/hostname: ${LITMUS_NODE}|g" run_test.yml
 
 #################
 ## RUNNER MAIN ##
 #################
 
 echo "Running the litmus test.."
-${utils_path}/litmus_job_runner label='app:postgres-deployment-litmus' job=run_test.yml
+${utils_path}/litmus_job_runner label='liveness:percona-liveness' job=run_test.yml
 ${utils_path}/task_delimiter;
 
 echo "Dumping state of cluster post job run"; echo ""

@@ -1,7 +1,18 @@
 #!/bin/bash
 set -x
 
+operator_ns="openebs"
+
 echo "Dumping state of cluster post job run"; echo ""
-kubectl get pods --all-namespaces
-kubectl get pvc --all-namespaces
-kubectl get sc
+echo "Get storageclass list";  kubectl get sc;  
+echo "Get pod status"; kubectl get pods --all-namespaces; 
+echo "Get pvc list"; kubectl get pvc --all-namespaces
+echo "Describe disks"; kubectl describe disk -n $operator_ns
+echo "Describe spc"; kubectl describe spc -n $operator_ns
+echo "Describe storagepools"; kubectl describe sp -n $operator_ns
+echo "Describe csp"; kubectl describe csp -n $operator_ns
+echo "Describe cvr"; kubectl describe cvr -n $operator_ns
+echo "Describe cv"; kubectl describe cv -n $operator_ns
+echo "Describe sc"; kubectl describe sc -n $operator_ns
+
+
