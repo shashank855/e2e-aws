@@ -29,7 +29,7 @@ cp run_litmus_test.yml run_test.yml
   ---------------------------------------------------------------------------------------
  | litmusJobLabel       | jobSpec  | node-failure-drain | node-failure-drain-cstor       |
  | appNamespace         | env	   | app-percona-ns     | percona-cstor                  |
- | runID		| env(add) | 	-		| cstor
+ | runID		| env(add) | 	-		| cstor                          |
  | livenessLabel        | env      | liveness=node-chaos| liveness=percona-liveness-cstor|
   ------------------------------------------------------------------------------------
 EOF
@@ -47,6 +47,14 @@ sed -i '/command:/i \
           - name: RUN_ID\
             value: '"${run_id}"'\
 ' run_test.yml
+
+
+#################
+## PRE-CHECKS  ##
+#################
+
+echo "Running cluster & test-infra health check before chaos"
+${utils_path}/cluster_health_check component='test-infra'
 
 #################
 ## RUNNER MAIN ##

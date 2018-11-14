@@ -8,15 +8,21 @@ set -x
 ## https://github.com/openebs/litmus/blob/master/apps/percona/workload/test_vars.yml 
 test_name=$(${utils_path}/generate_test_name testcase=percona-loadgen metadata="")
 
-###################
-## DEPENDENCIES  ##
-###################
+#########################
+## INFRA DEPENDENCIES  ##
+#########################
 
 ${utils_path}/setup_dependencies litmus-test
 
 ## Clone the litmus repo, navigate to litmus root 
 git clone https://github.com/openebs/litmus.git
 cd litmus 
+
+#######################
+## JOB DEPENDENCIES  ##
+#######################
+
+${utils_paths}/wait_on_job label='app:percona-deployment'
 
 ############################
 ## LITMUS PRECONDITIONING ##
