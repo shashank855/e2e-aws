@@ -34,7 +34,8 @@ cp run_litmus_test.yml run_test.yml
   ------------------------------------------------------------------------------------
 EOF
 
-cp apps/percona/deployers/run_litmus_test.yml run_test.yml
+#cp apps/percona/deployers/run_litmus_test.yml run_test.yml
+
 sed -i -e 's/name: node-failure-drain/name: node-failure-drain-cstor/g' \
 -e 's/value: app-percona-ns/value: percona-cstor/g' \
 -e 's/liveness=node-chaos/liveness=percona-liveness-cstor/g' \
