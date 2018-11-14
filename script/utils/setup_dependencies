@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x 
+set -ex 
 
 ## TODO: Identify if both 'aws' & 'aws-openebs' are necessary, can't 'aws' alone be passed as artifact
 ## TODO: csv files are needed only at cleanup, are they necessary for infra-setup job
@@ -32,7 +32,10 @@ setup_cluster_config_test()
  cp -r aws-openebs/ssh/. ~/.ssh/
 
  ## TODO: Add this as a conditional step in master utils 
- export LITMUS_NODE=$(cat aws-openebs/node_property | cut -d "," -f 1 | awk '{print $2}')
+ #export LITMUS_NODE=$(cat aws-openebs/node_property | cut -d "," -f 1 | awk '{print $2}')
+
+ LITMUS_NODE=$(cat aws-openebs/node_property | cut -d "," -f 1 | awk '{print $2}')
+ echo ${LITMUS_NODE}
 }
 
 if [[ $1 == "infra-setup" ]]; then

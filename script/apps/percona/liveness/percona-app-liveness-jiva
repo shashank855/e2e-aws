@@ -12,7 +12,7 @@ run_id=""; test_name=$(${utils_path}/generate_test_name testcase=percona-livenes
 ## INFRA DEPENDENCIES ##
 ########################
 
-${utils_path}/setup_dependencies litmus-test
+observer_node=$(${utils_path}/setup_dependencies litmus-test)
 
 ## Clone the litmus repo,navigate to litmus root 
 git clone https://github.com/openebs/litmus.git
@@ -31,7 +31,7 @@ ${utils_paths}/wait_on_job label='app:percona-deployment'
 cp apps/percona/liveness/run_litmus_test.yml run_test.yml
 
 sed -i -e "s|#nodeSelector|nodeSelector|g" \
--e "s|#  kubernetes.io/hostname:|  kubernetes.io/hostname: ${LITMUS_NODE}|g" run_test.yml
+-e "s|#  kubernetes.io/hostname:|  kubernetes.io/hostname: ${observer_node}|g" run_test.yml
 
 #################
 ## RUNNER MAIN ##

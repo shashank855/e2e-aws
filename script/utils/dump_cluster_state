@@ -12,7 +12,6 @@ echo "Describe spc"; kubectl describe spc -n $operator_ns
 echo "Describe storagepools"; kubectl describe sp -n $operator_ns
 echo "Describe csp"; kubectl describe csp -n $operator_ns
 echo "Describe cvr"; kubectl describe cvr -n $operator_ns
-echo "Describe cv"; kubectl describe cv -n $operator_ns
 echo "Describe sc"; kubectl describe sc -n $operator_ns
 
 

@@ -11,7 +11,7 @@ run_id="cstor"; test_name=$(${utils_path}/generate_test_name testcase=node-failu
 ## DEPENDENCIES  ##
 ###################
 
-${utils_path}/setup_dependencies litmus-test
+observer_node=$(${utils_path}/setup_dependencies litmus-test)
 
 wget https://raw.githubusercontent.com/openebs/litmus/004cc2e797f910783975939007aaa919f5c1df5a/apps/percona/chaos/drain_node/run_litmus_test.yml
 cp run_litmus_test.yml run_test.yml
@@ -42,7 +42,7 @@ sed -i -e 's/name: node-failure-drain/name: node-failure-drain-cstor/g' \
 -e 's/"run"/"infra-aid"/g' \
 -e 's/"litmuspod"/"observer"/g' run_test.yml
 
-sed -i -e "s/test-node/${LITMUS_NODE}/g" run_test.yml
+sed -i -e "s/test-node/${observer_node}/g" run_test.yml
 
 sed -i '/command:/i \
           - name: RUN_ID\

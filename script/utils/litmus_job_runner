@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -ex
 
 litmus_job_label_key=$(echo $1 | cut -d "=" -f 2 | cut -d ":" -f 1)
 litmus_job_label_value=$(echo $1 | cut -d "=" -f 2 | cut -d ":" -f 2)
