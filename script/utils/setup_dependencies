@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex 
+set -x 
 
 ## TODO: Identify if both 'aws' & 'aws-openebs' are necessary, can't 'aws' alone be passed as artifact
 ## TODO: csv files are needed only at cleanup, are they necessary for infra-setup job
