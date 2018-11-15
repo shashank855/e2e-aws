@@ -3,6 +3,7 @@ set -ex
 
 litmus_job_label_key=$(echo $1 | cut -d "=" -f 2 | cut -d ":" -f 1)
 litmus_job_label_value=$(echo $1 | cut -d "=" -f 2 | cut -d ":" -f 2)
+litmus_result_cr_name=$(echo $2 | cut -d "=" -f 2)
 
 jobNameCmd="kubectl get jobs -n litmus --no-headers -o jsonpath='{.items[?(@.metadata.labels.${litmus_job_label_key}==\"${litmus_job_label_value}\")].metadata.name}'"
 
@@ -14,15 +15,13 @@ litmus_pod=$(eval ${litmusPodCmd}); retcode=$?
 ${utils_path}/error_handler ${retcode} msg="Unable to find litmus test runner pod, exiting" action="exit"
 
 containerStateCmd="kubectl get pod ${litmus_pod} -n litmus -o jsonpath='{.status.containerStatuses[?(@.name==\"ansibletest\")].state}'"
-jobStateCmd="kubectl get pod ${litmus_pod} --no-headers -n litmus -o custom-columns=:status.phase"
+testStateCmd="kubectl get litmusresult ${litmus_result_cr_name} -n litmus --no-headers -o custom-columns=:spec.testStatus.phase"
 
-
-## TODO: Consider cases where litmus pod is evicted
-
+# wait until the test job starts
 while true; do
   cstate=$(eval ${containerStateCmd}); rc=$?
   if [[ $rc -eq 0 && ! -z $cstate ]]; then
-    if [[ ! $cstate =~ 'terminated' ]]; then
+    if [[ ! $cstate =~ 'running' ]]; then
       sleep 1
     else break;
     fi
@@ -31,16 +30,19 @@ while true; do
   fi
 done
 
+# wait for litmus CR to be created 
+sleep 120
+
+# wait for the test status to be marked completed
 while true; do
-  jstate=$(eval ${jobStateCmd}); rc=$?
-  if [[ $rc -eq 0 && ! -z $jstate ]]; then
-    if [[ $jstate =~ 'Running' ]]; then
+  tstate=$(eval ${testStateCmd}); rc=$?
+  if [[ $rc -eq 0 && ! -z $tstate ]]; then
+    if [[ ! $tstate =~ 'completed' ]]; then
       sleep 1
     else break;
     fi
   else
-    echo "unable to get litmus job status"; exit 1
+    echo "unable to get litmus result custom resource"; exit 1
   fi
 done
 
-echo "Litmus test run Job has completed"

@@ -28,16 +28,6 @@ jobStateCmd="kubectl get pod ${litmus_pod} --no-headers -n litmus -o custom-colu
 
 ## TODO: Consider cases where litmus pod is evicted
 
-: << EOF
-while [[ ! $(eval ${containerStateCmd}) =~ 'terminated' ]]; do
-  sleep 1 
-done 
-
-while [[ $(eval ${jobStateCmd}) =~ 'Running' ]]; do
-   sleep 1
-done
-EOF
-
 while true; do
   cstate=$(eval ${containerStateCmd}); rc=$?
   if [[ $rc -eq 0 && ! -z $cstate ]]; then
