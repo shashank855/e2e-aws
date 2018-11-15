@@ -40,7 +40,7 @@ EOF
 
 while true; do
   cstate=$(eval ${containerStateCmd}); rc=$?
-  if [[ $rc -eq 0 ]]; then
+  if [[ $rc -eq 0 && ! -z $cstate ]]; then
     if [[ ! $cstate =~ 'terminated' ]]; then 
       sleep 1
     else break;
@@ -52,7 +52,7 @@ done
   
 while true; do
   jstate=$(eval ${jobStateCmd}); rc=$?
-  if [[ $rc -eq 0 ]]; then
+  if [[ $rc -eq 0 && ! -z $jstate ]]; then
     if [[ $jstate =~ 'Running' ]]; then 
       sleep 1
     else break;

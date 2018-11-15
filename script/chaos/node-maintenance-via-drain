@@ -44,6 +44,9 @@ sed -i -e 's/name: node-failure-drain/name: node-failure-drain-cstor/g' \
 
 sed -i -e "s/test-node/${observer_node}/g" run_test.yml
 
+#temp
+sed -i -e 's|openebs/ansible-runner:ci|dargas/ansible-runner:drain|g' run_test.yml
+
 sed -i '/command:/i \
           - name: RUN_ID\
             value: '"${run_id}"'\
