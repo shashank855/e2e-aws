@@ -23,7 +23,8 @@ cd litmus
 ## JOB DEPENDENCIES  ##
 #######################
 
-${utils_path}/wait_on_job label='app:percona-deployment-cstor'
+#${utils_path}/wait_on_job label='app:percona-deployment-cstor'
+${utils_path}/litmus_job_runner label='app:percona-deployment-cstor' jobfile=none action='wait_on_job'
 
 ############################
 ## LITMUS PRECONDITIONING ##
