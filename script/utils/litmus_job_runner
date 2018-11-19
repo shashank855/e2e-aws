@@ -6,17 +6,16 @@ litmus_job_label_value=$(echo $1 | cut -d "=" -f 2 | cut -d ":" -f 2)
 litmus_job_file=$(echo $2 | cut -d "=" -f 2)
 util_action=$(echo $3 | cut -d "=" -f 2)
 
-echo "Running the litmus test.."
-
 jobNameCmd="kubectl get jobs -n litmus --no-headers -o jsonpath='{.items[?(@.metadata.labels.${litmus_job_label_key}==\"${litmus_job_label_value}\")].metadata.name}'"
 
 if [[ ${util_action} == "run_job" ]]; then
+  echo "Running the litmus test.."
   job_deploy_out=$(kubectl create -f ${litmus_job_file}) && \
   job_name=$(eval ${jobNameCmd}); retcode=$?
   ${utils_path}/error_handler ${retcode} msg="Unable to run litmusbook, exiting" action="exit"
 
 elif [[ ${util_action} == "wait_on_job" ]]; then
-  job_name=$(eval ${jobNameCmd}); retcode=$?
+  echo "Get litmus jobname" && job_name=$(eval ${jobNameCmd}); retcode=$?
   ${utils_path}/error_handler ${retcode} msg="Unable to run litmusbook, exiting" action="exit"
 fi
 
