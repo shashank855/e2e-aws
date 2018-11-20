@@ -64,8 +64,7 @@ sed -i -e "s|#nodeSelector|nodeSelector|g" \
 echo "Running the litmus test.."
 # Unlike other tests, liveness gitlab runners need to exit immediately after verifying "liveness
 # launch success" via CR. This calls for us to perform a one-time confirmation of liveness pod.
-${utils_path}/litmus_job_runner label='liveness:percona-liveness-cstor' jobfile=run_test.yml action='run_job' cr=NA
-${utils_path}/litmus_job_runner label='liveness:percona-liveness-cstor' jobfile=NA action='wait_on_result_cr' cr=${test_name}
+${utils_path}/litmus_job_runner label='liveness:percona-liveness-cstor' jobfile=run_test.yml action='run_and_wait_on_result_cr' cr=${test_name}
 ${utils_path}/task_delimiter;
 
 echo "Dumping state of cluster post job run"; echo ""

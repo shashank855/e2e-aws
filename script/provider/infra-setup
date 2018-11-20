@@ -69,7 +69,7 @@ cp providers/openebs/installers/operator/master/litmusbook/openebs_setup.yaml ru
 #################
 
 echo "Running litmus test for openebs deploy.."
-${utils_path}/litmus_job_runner label='provider:openebs-setup' jobfile=run_test.yml action='run_job' cr=NA
+${utils_path}/litmus_job_runner label='provider:openebs-setup' jobfile=run_test.yml action='run_job_to_completion' cr=NA
 ${utils_path}/task_delimiter;
 
 echo "Dumping state of cluster post job run"; echo ""

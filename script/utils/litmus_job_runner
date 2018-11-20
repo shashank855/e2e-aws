@@ -13,7 +13,7 @@ litmus_result_cr_name=$(echo $4 | cut -d "=" -f 2)
 # Define Cmd to get job name
 jobNameCmd="kubectl get jobs -n litmus --no-headers -o jsonpath='{.items[?(@.metadata.labels.${litmus_job_label_key}==\"${litmus_job_label_value}\")].metadata.name}'"
 
-if [[ ${util_action} == "run_job" ]]; then
+if [[ ${util_action} == "run_job_to_completion" || ${util_action} == "run_and_wait_on_result_cr" ]]; then
   echo "Running the litmus test.."
   job_deploy_out=$(kubectl create -f ${litmus_job_file}) && \
   job_name=$(eval ${jobNameCmd}); retcode=$?
@@ -38,7 +38,7 @@ testStateCmd="kubectl get litmusresult ${litmus_result_cr_name} -n litmus --no-h
 
 ## TODO: Consider cases where litmus pod is evicted
 
-if [[ ${util_action} == "wait_on_result_cr" ]]; then
+if [[ ${util_action} == "run_and_wait_on_result_cr" ]]; then
   
   ## Wait till the ansibletest container starts running && CR is created. 
   ## Wait until test CR is marked completed (from in-progress)
