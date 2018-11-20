@@ -58,7 +58,7 @@ percona-cstor-run/load/check 0:3:
 percona-cstor-run/load/check 1:3:
   extends: .app_deploy_template
   script: 
-   - ./script/apps/percona/workload/cstor/percona-app-workload-cstor
+   - ./script/apps/percona/workload/percona-app-workload-cstor
 
 percona-cstor-run/load/check 2:3:
   extends: .app_deploy_template

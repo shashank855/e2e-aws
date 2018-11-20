@@ -23,8 +23,8 @@ cd litmus
 ## JOB DEPENDENCIES  ##
 #######################
 
-#${utils_path}/wait_on_job label='app:percona-deployment-cstor'
-${utils_path}/litmus_job_runner label='app:percona-deployment-cstor' jobfile=none action='wait_on_job'
+sleep 180 #wait until deployer is initiated, else job wont be found 
+${utils_path}/litmus_job_runner label='app:percona-deployment-cstor' jobfile=NA action='wait_on_job' cr=NA
 
 ############################
 ## LITMUS PRECONDITIONING ##
@@ -56,7 +56,7 @@ sed -i '/command:/i \
 #################
 
 echo "Running the litmus test.."
-${utils_path}/litmus_job_runner label='loadgen:percona-loadjob-cstor' job=run_test.yml action='run_job'
+${utils_path}/litmus_job_runner label='loadgen:percona-loadjob-cstor' job=run_test.yml action='run_job' cr=NA
 ${utils_path}/task_delimiter;
 
 echo "Dumping state of cluster post job run"; echo ""

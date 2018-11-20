@@ -65,7 +65,7 @@ ${utils_path}/cluster_health_check component='test-infra'
 #################
 
 echo "Running the litmus test.."
-${utils_path}/litmus_job_runner label='name:node-failure-drain-cstor' jobfile=run_test.yml action='run_job'
+${utils_path}/litmus_job_runner label='name:node-failure-drain-cstor' jobfile=run_test.yml action='run_job' cr=NA
 ${utils_path}/task_delimiter;
 
 echo "Dumping state of cluster post job run"; echo ""
