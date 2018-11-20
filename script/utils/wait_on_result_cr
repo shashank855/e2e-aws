@@ -7,8 +7,10 @@ litmus_result_cr_name=$(echo $2 | cut -d "=" -f 2)
 
 jobNameCmd="kubectl get jobs -n litmus --no-headers -o jsonpath='{.items[?(@.metadata.labels.${litmus_job_label_key}==\"${litmus_job_label_value}\")].metadata.name}'"
 
+jobList=$(kubectl get jobs -n litmus) && \
 job_name=$(eval ${jobNameCmd}); retcode=$?
 ${utils_path}/error_handler ${retcode} msg="Unable to find litmusbook, exiting" action="exit"
+echo $jobList
 
 litmusPodCmd="kubectl get pod --no-headers -n litmus -o jsonpath='{.items[?(@.metadata.labels.job-name==\"${job_name}\")].metadata.name}'"
 litmus_pod=$(eval ${litmusPodCmd}); retcode=$?

@@ -15,8 +15,10 @@ if [[ ${util_action} == "run_job" ]]; then
   ${utils_path}/error_handler ${retcode} msg="Unable to run litmusbook, exiting" action="exit"
 
 elif [[ ${util_action} == "wait_on_job" ]]; then
-  echo "Get litmus jobname" && job_name=$(eval ${jobNameCmd}); retcode=$?
+  jobList=$(kubectl get jobs -n litmus) && \
+  job_name=$(eval ${jobNameCmd}); retcode=$?
   ${utils_path}/error_handler ${retcode} msg="Unable to run litmusbook, exiting" action="exit"
+  echo $jobList
 fi
 
 ## Obtain the litmus pod name 
