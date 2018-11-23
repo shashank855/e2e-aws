@@ -39,3 +39,12 @@ cp -r ~/.ssh/. /openebs/e2e-aws/aws/ssh
 
 # -------------------------- Applying configmap -------------------------
 kubectl create configmap kubeconfig --from-file=/openebs/e2e-aws/aws/.kube/admin.conf -n litmus
+
+# -------------------------- Attach Disks -------------------------------
+aws_cluster_name=$(cat /tmp/aws/cluster_name.csv | cut -d ":" -f 2); echo ${aws_cluster_name}
+cd ../ebs-volumes
+ansible-playbook create-ebs-volume.yml --extra-vars "cluster_name=nodes.k8s-${aws_cluster_name}.k8s.local" -vv
+cat /tmp/aws/volume-id > /openebs/e2e-aws/aws/cluster/volume-id
+cat /tmp/aws/volume-id
+
+

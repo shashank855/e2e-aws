@@ -15,6 +15,9 @@ export AWS_DEFAULT_OUTPUT=json
 mkdir /tmp/aws
 cat aws/cluster/id.csv > /tmp/aws/id.csv
 cat aws/cluster/cluster_name.csv >/tmp/aws/cluster_name.csv
+cat aws/cluster/volume-id >/tmp/aws/volume-id
+
+aws_cluster_name=$(cat /tmp/aws/cluster_name.csv | cut -d ":" -f 2); echo ${aws_cluster_name}
 
 # ---- Cloning litmus repository for cleaning AWS cluster and pre-requisite--------
 git clone https://github.com/openebs/litmus.git
@@ -25,3 +28,7 @@ ansible-playbook delete-aws-cluster.yml -v
 
 # ---------------------- Deleting AWS pre-requisite -------------------------------
 ansible-playbook delete-pre-requisite.yml -v
+
+# ---------------------- Deleting Disks ------------------------------------------#
+cd ../ebs-volumes
+ansible-playbook delete-ebs-volume.yml --extra-vars "cluster_name=nodes.k8s-${aws_cluster_name}.k8s.local"
