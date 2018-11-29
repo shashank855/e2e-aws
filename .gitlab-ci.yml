@@ -30,17 +30,8 @@ openebs-aws-deploy:
   stage: PROVIDER-INFRA-SETUP
   dependencies:
     - aws-cluster
-  script: 
+  before_script:  
    - ./script/provider/infra-setup
-  artifacts:
-    paths:
-      - aws-openebs/
-
-cstor-disk-pool:
-  image: atulabhi/kops:v8
-  stage: PROVIDER-INFRA-SETUP
-  dependencies:
-    - aws-cluster
   script: 
    - ./script/provider/cstor/cstor-disk-pool-provision
   artifacts:
