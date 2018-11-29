@@ -25,6 +25,8 @@ cd litmus
 
 cp apps/percona/functional/k8s_snapshot/run_litmus_test.yml run_test.yml
 
+sed -i -e 's/value: app-percona-ns/value: percona-single-replica/g' run_test.yml
+
 #################
 ## RUNNER MAIN ##
 #################
