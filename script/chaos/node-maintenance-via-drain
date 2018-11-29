@@ -13,8 +13,9 @@ run_id="cstor"; test_name=$(${utils_path}/generate_test_name testcase=node-failu
 
 observer_node=$(${utils_path}/setup_dependencies litmus-test)
 
-wget https://raw.githubusercontent.com/openebs/litmus/004cc2e797f910783975939007aaa919f5c1df5a/apps/percona/chaos/drain_node/run_litmus_test.yml
-cp run_litmus_test.yml run_test.yml
+git clone https://github.com/openebs/litmus.git
+cd litmus
+
 
 ############################
 ## LITMUS PRECONDITIONING ##
@@ -34,18 +35,15 @@ cp run_litmus_test.yml run_test.yml
   ------------------------------------------------------------------------------------
 EOF
 
-#cp apps/percona/deployers/run_litmus_test.yml run_test.yml
+cp apps/percona/chaos/drain_node/run_litmus_test.yml run_test.yml
 
 sed -i -e 's/name: node-failure-drain/name: node-failure-drain-cstor/g' \
--e 's/value: app-percona-ns/value: percona-cstor/g' \
--e 's/liveness=node-chaos/liveness=percona-liveness-cstor/g' \
--e 's/"run"/"infra-aid"/g' \
--e 's/"litmuspod"/"observer"/g' run_test.yml
+-e 's/value: app-percona-ns/value: percona-cstor/g'  run_test.yml
 
-sed -i -e "s/test-node/${observer_node}/g" run_test.yml
+sed -i '/nodeSelector/s/#//g' run_test.yml
+sed -i -e "s|#kubernetes.io/hostname:|kubernetes.io/hostname: ${observer_node}|g" run_test.yml
 
 #temp
-sed -i -e 's|openebs/ansible-runner:ci|dargas/ansible-runner:drain|g' run_test.yml
 
 sed -i '/command:/i \
           - name: RUN_ID\
