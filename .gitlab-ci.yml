@@ -8,6 +8,7 @@ stages:
   - STATEFUL-APP-DEPLOY
   - APP-FUNC-TEST
   - APP-CHAOS-TEST
+  - APP-DEPROVISION
   - CLUSTER-CLEANUP
 
 variables: 
@@ -33,6 +34,17 @@ openebs-aws-deploy:
     - aws-cluster
   script: 
    - ./script/provider/infra-setup
+  artifacts:
+    paths:
+      - aws-openebs/
+
+openebs-sc-deploy:
+  image: atulabhi/kops:v8
+  stage: PROVIDER-INFRA-SETUP
+  dependencies:
+    - aws-cluster
+  script: 
+   - ./script/provider/setup-sc
   artifacts:
     paths:
       - aws-openebs/
@@ -63,11 +75,19 @@ percona-jiva-run/load/check 1:2:
   script: 
    - ./script/apps/percona/workload/jiva/percona-app-workload-jiva
 
+
+# PROMETHEUS-CSTOR
+prometheus-cstor-run/load/check:
+  extends: .app_deploy_template
+  script:
+   - ./script/apps/prometheus/deployer/prometheus-app-deploy-cstor
+
 ## PERCONA-JIVA-SINGLE-REPLICA
 percona-jiva-single-replica-run/load/check:
   extends: .app_deploy_template
   script:
    - ./script/apps/percona/deployer/percona-deploy-jiva-single-replica
+
 
 ## MONGO-JIVA
 mongo-jiva-run/load/check 0:2:
@@ -100,13 +120,6 @@ cassandra-jiva-run/load/check 0:2:
   extends: .app_deploy_template
   script: 
    - ./script/apps/cassandra/deployer/cassandra-app-deploy-jiva
-
-cassandra-jiva-run/load/check 1:2:
-  extends: .app_deploy_template
-  before_script: 
-   - sleep 180
-  script: 
-   - ./script/apps/cassandra/workload/jiva/cassandra-app-workload-jiva
 
 # JENKINS-JIVA
 jenkins-jiva-run/load/check:
@@ -146,13 +159,6 @@ cassandra-cstor-run/load/check 0:2:
   script:
    - ./script/apps/cassandra/deployer/cassandra-app-deploy-cstor
 
-cassandra-cstor-run/load/check 1:2:
-  extends: .app_deploy_template
-  before_script:
-   - sleep 180
-  script:
-   - ./script/apps/cassandra/workload/cstor/cassandra-app-workload-cstor
-
 # JENKINS_CSTOR
 jenkins-cstor-run/load/check:
   extends: .app_deploy_template
@@ -179,6 +185,11 @@ app-upgrade-deployment-{jenkins-jiva}:
   script:
    - ./script/apps/jenkins/functional/jiva/app-upgrade-deployment
 
+k8s-snapshot-clone-creation-{snapshot-clone-jiva}:
+  extends: .func_test_template
+  script:
+   - ./script/apps/percona/functional/jiva/k8s-snapshot-clone
+
 volume-data-integrity-{fio-jiva}:
   extends: .func_test_template 
   script:
@@ -194,10 +205,10 @@ volume-memory-consumption-{memcheck-jiva}:
   script:
    - ./script/apps/memleak/tests/jiva/memory-consumption
 
-k8s-snapshot-clone-creation-{snapshot-clone-jiva}:
+volume-memory-consumption-{memcheck-cstor}:
   extends: .func_test_template
   script:
-   - ./script/apps/percona/functional/jiva/k8s-snapshot-clone
+   - ./script/apps/prometheus/functional/cstor/memcheck/memory-consumption
 
 app-replica-scale-{cassandra-cstor}:
   extends: .func_test_template #dependencies: cassandra-cstor
@@ -218,6 +229,16 @@ app-upgrade-deployment-{jenkins-cstor}:
   artifacts:
     paths: 
       - aws-openebs/
+
+app-kill-{mongo-jiva-xfs}:
+  extends: .chaos_test_template #dependencies: mongo-jiva
+  script:
+   - ./script/apps/mongo/chaos/jiva/application-pod-failure
+
+app-kill-{jenkins-cstor}:
+  extends: .chaos_test_template #dependencies: jenkins-cstor
+  script:
+   - ./script/apps/jenkins/chaos/cstor/application-pod-failure
 
 repl-kill-{percona-jiva}:
   extends: .chaos_test_template #dependencies: percona-jiva
@@ -248,6 +269,52 @@ tgt-disconnect-{mongo-cstor}:
   extends: .chaos_test_template #dependencies: mongo-cstor
   script:
    - ./script/apps/mongo/chaos/cstor/volume-target-network-delay
+
+## Define a job template for app deprovision
+
+.app_deprovision_template:
+  image: atulabhi/kops:v8
+  stage: APP-DEPROVISION
+  when: always
+  artifacts:
+    paths: 
+      - aws-openebs/
+
+## PERCONA-JIVA
+percona-jiva-deprovision:
+  extends: .app_deprovision_template
+  script:
+   - ./script/apps/percona/deprovision/percona-app-deprovision-jiva
+
+## PROMETHEUS-CSTOR
+prometheus-cstor-deprovision:
+  extends: .app_deprovision_template
+  script:
+   - ./script/apps/prometheus/deprovision/prometheus-app-deprovision-cstor
+
+## MONGODB-JIVA
+mongodb-jiva-deprovision:
+  extends: .app_deprovision_template
+  script:
+   - ./script/apps/mongo/deprovision/mongo-app-deprovision-jiva
+
+## POSTGRES-JIVA
+postgres-jiva-deprovision:
+  extends: .app_deprovision_template
+  script:
+   - ./script/apps/postgres/deprovision/postgres-app-deprovision-jiva
+
+## JENKINS-JIVA
+jenkins-jiva-deprovision:
+  extends: .app_deprovision_template
+  script:
+   - ./script/apps/jenkins/deprovision/jenkins-app-deprovision-jiva
+
+## CASSANDRA-JIVA
+cassandra-jiva-deprovision:
+  extends: .app_deprovision_template
+  script:
+   - ./script/apps/cassandra/deprovision/cassandra-app-deprovision-jiva
 
 cleanup-aws:
   when: always
