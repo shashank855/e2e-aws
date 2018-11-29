@@ -36,6 +36,19 @@ openebs-aws-deploy:
     paths:
       - aws-openebs/
 
+cstor-disk-pool:
+  image: atulabhi/kops:v8
+  stage: PROVIDER-INFRA-SETUP
+  dependencies:
+    - aws-cluster
+  before_script:
+   - ./script/provider/infra-setup
+  script: 
+   - ./script/provider/cstor/cstor-disk-pool-provision
+  artifacts:
+    paths:
+      - aws-openebs/
+
 ## Define a job template for app deployers
 
 .app_deploy_template:
