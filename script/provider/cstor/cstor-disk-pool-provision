@@ -17,6 +17,13 @@ ${utils_path}/setup_dependencies litmus-test
 git clone https://github.com/openebs/litmus.git
 cd litmus
 
+#######################
+## JOB DEPENDENCIES  ##
+#######################
+
+sleep 180 #wait until deployer is initiated, else job wont be found
+${utils_path}/litmus_job_runner label='provider:openebs-setup' jobfile=NA action='wait_on_job' cr=NA
+
 ############################
 ## LITMUS PRECONDITIONING ##
 ############################

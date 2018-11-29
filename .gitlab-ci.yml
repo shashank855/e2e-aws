@@ -41,8 +41,6 @@ cstor-disk-pool:
   stage: PROVIDER-INFRA-SETUP
   dependencies:
     - aws-cluster
-  before_script:
-   - ./script/provider/infra-setup
   script: 
    - ./script/provider/cstor/cstor-disk-pool-provision
   artifacts:
