@@ -6,7 +6,9 @@ stages:
   - CLUSTER-SETUP
   - PROVIDER-INFRA-SETUP
   - STATEFUL-APP-DEPLOY
-  - NODE-DRAIN
+  - NODE-MAINTENANCE-DRAIN
+  - NODE-LOSS-EVICT
+  - STORAGE-POOL-FAILURE
   - CLUSTER-CLEANUP
 
 variables: 
@@ -77,10 +79,28 @@ percona-cstor-run/load/check 2:3:
       - aws-openebs/
 
 node-maintenance-via-drain:
-  stage: NODE-DRAIN
+  stage: NODE-MAINTENANCE-DRAIN
   extends: .chaos_test_template #dependencies: percona-cstor
   script:
    - ./script/chaos/node-maintenance-via-drain
+
+node-maintenance-via-drain:
+  stage: NODE-LOSS-EVICT
+  extends: .chaos_test_template #dependencies: percona-cstor
+  script:
+   - ./script/chaos/nodeloss-via-pod-evict
+
+storage-pool-failure 0:2:
+  stage: STORAGE-POOL-FAILURE
+  extends: .chaos_test_template #dependencies: percona-cstor
+  script:
+   - ./script/chaos/cstor-pool-pod-delete
+
+storage-pool-failure 1:2:
+  stage: STORAGE-POOL-FAILURE
+  extends: .chaos_test_template #dependencies: percona-cstor
+  script:
+   - ./script/chaos/cstor-pool-pod-kill
 
 cleanup-aws:
   when: always
