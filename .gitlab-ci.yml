@@ -84,7 +84,7 @@ node-maintenance-via-drain:
   script:
    - ./script/chaos/node-maintenance-via-drain
 
-node-maintenance-via-drain:
+node-loss-via-evict:
   stage: NODE-LOSS-EVICT
   extends: .chaos_test_template #dependencies: percona-cstor
   script:
