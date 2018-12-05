@@ -39,7 +39,7 @@ EOF
 
 cp apps/mongodb/deployers/run_litmus_test.yml run_test.yml
 sed -i -e 's/app: mongodb-deployment-litmus/app: mongodb-deployment-cstor/g' \
--e 's/value: openebs-mongodb/value: openebs-cstor-sparse/g' \
+-e 's/value: openebs-mongodb/value: cstor-xfs/g' \
 -e 's/value: app-mongo-ns/value: mongocstor/g' run_test.yml
 
 sed -i '/command:/i \
