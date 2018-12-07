@@ -1,0 +1,76 @@
+#!/bin/bash
+set -x
+
+#################
+## ENVIRONMENT ##
+#################
+
+run_id="cstor"; test_name=$(${utils_path}/generate_test_name testcase=openebs-app-svc-chaos metadata=${run_id})
+ 
+###################
+## DEPENDENCIES  ##
+###################
+
+## Sets up the artifact dependencies & also set env LITMUS_NODE
+observer_node=$(${utils_path}/setup_dependencies litmus-test)
+
+## Clone the litmus repo, navigate to litmus root 
+git clone https://github.com/openebs/litmus.git
+cd litmus
+
+############################
+## LITMUS PRECONDITIONING ##
+############################
+
+## TODO: Better way/logic to replace job ENV (SC, PVC, LABEL, NS) based on run instance intent (CLI) 
+## TODO: Add logic to add ENV for run_instance_metadata/RunID
+
+: << EOF
+  ---------------------------------------------------------------------------------------------
+ | specAttribute        | kind	   | jiva       	      | cStor-sparse  	               |
+  ---------------------------------------------------------------------------------------------
+ | litmusJobLabel       | jobSpec  | openebs-app-svc-chaos    | openebs-app-svc-chaos          |
+ | appNamespace         | env	   | app-percona-ns           | percona-cstor                  |
+ | runID		| env(add) | 	-		      | cstor                          |
+ | livenessLabel        | env      | liveness=percona-liveness| liveness=percona-liveness-cstor|
+  ---------------------------------------------------------------------------------------------
+EOF
+
+cp apps/percona/chaos/openebs_app_svc_chaos/run_litmus_test.yml run_test.yml
+
+sed -i -e 's/value: app-percona-ns/value: percona-cstor/g' \
+-e 's/liveness=percona-liveness/liveness=percona-liveness-cstor/g' run_test.yml
+
+## Note: variable substitution in sed needs double-quotes. Usage of "|" to avoid escaping "/"
+
+sed -i '/command:/i \
+          - name: RUN_ID\
+            value: '"${run_id}"'\
+' run_test.yml
+
+#################
+## PRE-CHECKS  ##
+#################
+
+echo "Running cluster & test-infra health check before chaos"
+${utils_path}/cluster_health_check component='test-infra'
+
+#################
+## RUNNER MAIN ##
+#################
+
+echo "Running the litmus test.."
+${utils_path}/litmus_job_runner label='name:openebs-app-svc-chaos' jobfile=run_test.yml action='run_job_to_completion' cr=NA
+${utils_path}/task_delimiter;
+
+echo "Dumping state of cluster post job run"; echo ""
+${utils_path}/dump_cluster_state;
+${utils_path}/task_delimiter;
+
+#################
+## GET RESULT  ##
+#################
+
+## Check the test status & result from the litmus result custom resource
+${utils_path}/get_litmus_result ${test_name}
+
