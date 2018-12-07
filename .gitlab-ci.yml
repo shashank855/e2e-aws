@@ -64,10 +64,6 @@ percona-cstor-run/load/check 1:3:
   script: 
    - ./script/apps/percona/workload/percona-app-workload-cstor
 
-percona-cstor-run/load/check 2:3:
-  extends: .app_deploy_template
-  script: 
-   - ./script/apps/percona/liveness/percona-app-liveness-cstor
 
 ## Define job template for chaos jobs 
 
@@ -81,24 +77,32 @@ percona-cstor-run/load/check 2:3:
 node-maintenance-via-drain:
   stage: NODE-MAINTENANCE-DRAIN
   extends: .chaos_test_template #dependencies: percona-cstor
+  before_script:
+   - ./script/apps/percona/liveness/percona-app-liveness-cstor
   script:
    - ./script/chaos/node-maintenance-via-drain
 
 node-loss-via-evict:
   stage: NODE-LOSS-EVICT
   extends: .chaos_test_template #dependencies: percona-cstor
+  before_script:
+   - ./script/apps/percona/liveness/percona-app-liveness-cstor
   script:
    - ./script/chaos/nodeloss-via-pod-evict
 
 storage-pool-failure 0:2:
   stage: STORAGE-POOL-FAILURE
   extends: .chaos_test_template #dependencies: percona-cstor
+  before_script:
+   - ./script/apps/percona/liveness/percona-app-liveness-cstor
   script:
    - ./script/chaos/cstor-pool-pod-delete
 
 storage-pool-failure 1:2:
   stage: STORAGE-POOL-FAILURE
   extends: .chaos_test_template #dependencies: percona-cstor
+  before_script:
+   - ./script/apps/percona/liveness/percona-app-liveness-cstor
   script:
    - ./script/chaos/cstor-pool-pod-kill
 

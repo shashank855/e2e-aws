@@ -22,10 +22,14 @@ cd litmus
 #######################
 ## JOB DEPENDENCIES  ##
 #######################
+# Define Cmd to get job name
 
-sleep 180 # wait for deployer job to initiate, else job won't be found 
-${utils_path}/litmus_job_runner label='app:percona-deployment-cstor' jobfile=NA action='wait_on_job' cr=NA
-
+jobNameCmd="kubectl get jobs -n litmus --no-headers -o jsonpath='{.items[?(@.metadata.labels.liveness==\"percona-liveness-cstor\")].metadata.name}'"
+job_name=$(eval ${jobNameCmd}); rc=$?
+if [[ $rc -eq 0 && ! -z $job_name ]]; then
+   echo "Delete the stale liveness job"; echo ""
+   kubectl delete job $job_name -n litmus
+fi
 ############################
 ## LITMUS PRECONDITIONING ##
 ############################
