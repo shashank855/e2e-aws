@@ -27,6 +27,8 @@ cd litmus
 
 cp apps/custom/tests/memcheck/run_litmus_test.yml run_test.yml
 
+sed -i -e "s/value: '800'/value: '1024'/g"  run_test.yml
+
 #################
 ## RUNNER MAIN ##
 #################
